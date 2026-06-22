@@ -1,6 +1,6 @@
 // src/components/LeftSidebar.jsx
-import React, { useState } from 'react';
-import { Plus, Trash2, Folder, Edit2, Check, X, Pin } from 'lucide-react';
+import { useState } from 'react';
+import { Plus, Trash2, Folder, Edit2, Check, X } from 'lucide-react';
 
 export default function LeftSidebar({
   canvases,
@@ -8,11 +8,7 @@ export default function LeftSidebar({
   setActiveCanvasId,
   onCreateCanvas,
   onDeleteCanvas,
-  onRenameCanvas,
-  pinned,
-  setPinned,
-  isOpen,
-  setIsOpen
+  onRenameCanvas
 }) {
   const [editingId, setEditingId] = useState(null);
   const [editName, setEditName] = useState('');
@@ -31,8 +27,6 @@ export default function LeftSidebar({
     setEditingId(null);
   };
 
-  if (!isOpen && !pinned) return null;
-
   return (
     <aside className="w-66 bg-slate-900 border-r border-slate-800 flex flex-col h-full z-20 shadow-2xl shrink-0 text-slate-200">
       <div className="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/40">
@@ -40,18 +34,9 @@ export default function LeftSidebar({
           <Folder className="text-indigo-400" size={18} />
           <h2 className="font-bold text-sm tracking-wide uppercase text-slate-400">Cave Systems</h2>
         </div>
-        <div className="flex items-center gap-1">
-          <button 
-            onClick={() => setPinned(!pinned)} 
-            className={`p-1.5 rounded hover:bg-slate-800 transition ${pinned ? 'text-indigo-400 bg-slate-800/50' : 'text-slate-500'}`}
-            title={pinned ? "Unpin Sidebar" : "Pin Sidebar"}
-          >
-            <Pin size={14} className={pinned ? 'rotate-45' : ''} />
-          </button>
-          <button onClick={onCreateCanvas} className="p-1.5 hover:bg-slate-800 rounded text-emerald-400 transition" title="New Map">
-            <Plus size={16} />
-          </button>
-        </div>
+        <button onClick={onCreateCanvas} className="p-1.5 hover:bg-slate-800 rounded text-emerald-400 transition" title="New Map">
+          <Plus size={16} />
+        </button>
       </div>
 
       <ul className="flex-1 overflow-y-auto p-2 flex flex-col gap-1">

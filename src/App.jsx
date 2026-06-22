@@ -1,6 +1,6 @@
 // src/App.jsx
 import { useState, useEffect, useRef } from 'react';
-import { Menu, RotateCw, Trash2 } from 'lucide-react';
+import { RotateCw, Trash2 } from 'lucide-react';
 import { MODULE_TEMPLATES, DIRECTION_OFFSETS, ROTATIONS, CELL_SIZE } from './constants/mapData';
 import { getGlobalJunctions, getValidRotations } from './utils/mapHelpers';
 import LeftSidebar from './components/LeftSidebar';
@@ -20,11 +20,6 @@ export default function UnderworldMapper() {
   const [showSelectorModal, setShowSelectorModal] = useState(false);
   const [activePlusTarget, setActivePlusTarget] = useState(null);
   const [hoveredModuleKey, setHoveredModuleKey] = useState(null);
-
-  const [pinnedLeftSidebar, setPinnedLeftSidebar] = useState(true);
-  const [pinnedRightSidebar, setPinnedRightSidebar] = useState(true);
-  const [showLeftSidebar, setShowLeftSidebar] = useState(true);
-  const [showRightSidebar, setShowRightSidebar] = useState(true);
 
   useEffect(() => {
     localStorage.setItem('underworld_maps', JSON.stringify(canvases));
@@ -46,15 +41,13 @@ export default function UnderworldMapper() {
           const template = MODULE_TEMPLATES[currentModule.templateId];
           let validAngles = ROTATIONS;
 
-          // If it has a parent, restrict rotation to angles that maintain the connection
           if (currentModule.parentJunction) {
             const requiredGlobalDir = DIRECTION_OFFSETS[currentModule.parentJunction].opposite;
             validAngles = getValidRotations(template.junctions, requiredGlobalDir);
           }
 
-          if (validAngles.length === 0) return canvas; // Safety fallback
+          if (validAngles.length === 0) return canvas;
 
-          // Cycle to the next valid rotation
           const currentIndex = validAngles.indexOf(currentModule.rotation);
           const nextIndex = (currentIndex + 1) % validAngles.length;
           const nextRotation = validAngles[nextIndex !== -1 ? nextIndex : 0];
@@ -110,7 +103,6 @@ export default function UnderworldMapper() {
     
     let initialRotation = 0;
 
-    // Auto-align upon placement if there is a parent connection
     if (parentJunction) {
       const requiredGlobalDir = DIRECTION_OFFSETS[parentJunction].opposite;
       const validAngles = getValidRotations(template.junctions, requiredGlobalDir);
@@ -119,7 +111,6 @@ export default function UnderworldMapper() {
         alert("This module does not have the required junction to connect here!");
         return;
       }
-      // Snap to the first valid alignment automatically
       initialRotation = validAngles[0];
     }
 
@@ -142,7 +133,7 @@ export default function UnderworldMapper() {
 
   // --- DRAG AND DROP HANDLERS ---
   const handleDragOver = (e) => {
-    e.preventDefault(); // Allows the drop
+    e.preventDefault();
   };
 
   const handleDrop = (e, targetParams) => {
@@ -221,28 +212,21 @@ export default function UnderworldMapper() {
 
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-slate-950 font-sans text-slate-200 select-none">
-      <div className="absolute top-4 left-4 z-30 flex gap-2">
-        {!pinnedLeftSidebar && (
-          <button onClick={() => setShowLeftSidebar(!showLeftSidebar)} className="p-2 bg-slate-900 border border-slate-800 rounded-lg shadow-xl hover:bg-slate-800 transition cursor-pointer"><Menu size={18} /></button>
-        )}
-      </div>
-      <div className="absolute top-4 right-4 z-30 flex gap-2">
-        {!pinnedRightSidebar && (
-          <button onClick={() => setShowRightSidebar(!showRightSidebar)} className="p-2 bg-slate-900 border border-slate-800 rounded-lg shadow-xl hover:bg-slate-800 transition cursor-pointer"><Menu size={18} /></button>
-        )}
-      </div>
-
+      
       <LeftSidebar
-        canvases={canvases} activeCanvasId={activeCanvasId} setActiveCanvasId={setActiveCanvasId}
-        onCreateCanvas={handleCreateCanvas} onDeleteCanvas={handleDeleteCanvas} onRenameCanvas={handleRenameCanvas}
-        pinned={pinnedLeftSidebar} setPinned={setPinnedLeftSidebar} isOpen={showLeftSidebar}
+        canvases={canvases} 
+        activeCanvasId={activeCanvasId} 
+        setActiveCanvasId={setActiveCanvasId}
+        onCreateCanvas={handleCreateCanvas} 
+        onDeleteCanvas={handleDeleteCanvas} 
+        onRenameCanvas={handleRenameCanvas}
       />
 
       <main 
         className={`flex-1 relative overflow-hidden h-full ${isPanning ? 'cursor-grabbing' : 'cursor-grab'}`}
         onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}
       >
-        <div className="absolute inset-0 w-full h-full bg-[radial-gradient(#334155_1.2px,transparent_1.2px)] [background-size:20px_20px]"
+        <div className="absolute inset-0 w-full h-full"
           style={{ transform: `translate(${panOffset.x}px, ${panOffset.y}px)`, transition: isPanning ? 'none' : 'transform 0.05s ease-out' }}>
           
           {Object.entries(modules).map(([key, mod]) => {
@@ -306,7 +290,7 @@ export default function UnderworldMapper() {
         </div>
       </main>
 
-      <RightSidebar pinned={pinnedRightSidebar} setPinned={setPinnedRightSidebar} isOpen={showRightSidebar} />
+      <RightSidebar />
 
       <ModuleSelectorModal
         isOpen={showSelectorModal}
