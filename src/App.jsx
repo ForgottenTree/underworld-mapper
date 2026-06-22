@@ -1,10 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
 import { RotateCw, Trash2 } from 'lucide-react';
-import { MODULE_TEMPLATES, DIRECTION_OFFSETS, ROTATIONS, CELL_SIZE } from './constants/mapData';
-import { getGlobalJunctions, getValidRotations } from './utils/mapHelpers';
+import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
+import { MODULE_TEMPLATES, DIRECTION_OFFSETS, CELL_SIZE, CATEGORY_META } from './constants/mapData';
+import { getGlobalJunctions, getRequiredDirections, getValidRotationsMulti } from './utils/mapHelpers';
 import LeftSidebar from './components/LeftSidebar';
 import RightSidebar from './components/RightSidebar';
 import ModuleSelectorModal from './components/ModuleSelectorModal';
+
+const bgImages = import.meta.glob('./assets/background_*.png', { eager: true });
+const getBgUrl = (templateId) => bgImages[`./assets/background_${templateId.toLowerCase()}.png`]?.default;
 
 export default function UnderworldMapper() {
   const [canvases, setCanvases] = useState(() => {
@@ -12,13 +16,10 @@ export default function UnderworldMapper() {
     return saved ? JSON.parse(saved) : [{ id: 'cave-1', name: 'First Cave System', modules: {} }];
   });
   const [activeCanvasId, setActiveCanvasId] = useState('cave-1');
-  const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
-  const [isPanning, setIsPanning] = useState(false);
-  const panStartRef = useRef({ x: 0, y: 0 });
 
   const [showSelectorModal, setShowSelectorModal] = useState(false);
   const [activePlusTarget, setActivePlusTarget] = useState(null);
-  const [hoveredModuleKey, setHoveredModuleKey] = useState(null);
+  const hoveredModuleKeyRef = useRef(null);
 
   useEffect(() => {
     localStorage.setItem('underworld_maps', JSON.stringify(canvases));
@@ -31,51 +32,32 @@ export default function UnderworldMapper() {
   // --- SMART KEYBOARD ROTATION ---
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.key.toLowerCase() === 'r' && hoveredModuleKey && modules[hoveredModuleKey]) {
-        setCanvases(prev => prev.map(canvas => {
-          if (canvas.id !== activeCanvasId) return canvas;
-          const currentModule = canvas.modules[hoveredModuleKey];
-          if (!currentModule) return canvas;
-          
-          const template = MODULE_TEMPLATES[currentModule.templateId];
-          let validAngles = ROTATIONS;
+      const key = hoveredModuleKeyRef.current;
+      if (e.key.toLowerCase() !== 'r' || !key || !modules[key]) return;
+      setCanvases(prev => prev.map(canvas => {
+        if (canvas.id !== activeCanvasId) return canvas;
+        const currentModule = canvas.modules[key];
+        if (!currentModule) return canvas;
 
-          if (currentModule.parentJunction) {
-            const requiredGlobalDir = DIRECTION_OFFSETS[currentModule.parentJunction].opposite;
-            validAngles = getValidRotations(template.junctions, requiredGlobalDir);
-          }
+        const template = MODULE_TEMPLATES[currentModule.templateId];
+        const requiredDirs = getRequiredDirections(currentModule.x, currentModule.y, canvas.modules);
+        const validAngles = getValidRotationsMulti(template.junctions, requiredDirs);
 
-          if (validAngles.length === 0) return canvas;
+        if (validAngles.length === 0) return canvas;
 
-          const currentIndex = validAngles.indexOf(currentModule.rotation);
-          const nextIndex = (currentIndex + 1) % validAngles.length;
-          const nextRotation = validAngles[nextIndex !== -1 ? nextIndex : 0];
+        const currentIndex = validAngles.indexOf(currentModule.rotation);
+        const nextIndex = (currentIndex + 1) % validAngles.length;
+        const nextRotation = validAngles[nextIndex !== -1 ? nextIndex : 0];
 
-          return {
-            ...canvas,
-            modules: {
-              ...canvas.modules,
-              [hoveredModuleKey]: { ...currentModule, rotation: nextRotation }
-            }
-          };
-        }));
-      }
+        return {
+          ...canvas,
+          modules: { ...canvas.modules, [key]: { ...currentModule, rotation: nextRotation } }
+        };
+      }));
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [hoveredModuleKey, modules, activeCanvasId]);
-
-  // --- PANNING HANDLERS ---
-  const handleMouseDown = (e) => {
-    if (e.target.closest('button') || e.target.closest('.interactive-node')) return;
-    setIsPanning(true);
-    panStartRef.current = { x: e.clientX - panOffset.x, y: e.clientY - panOffset.y };
-  };
-  const handleMouseMove = (e) => {
-    if (!isPanning) return;
-    setPanOffset({ x: e.clientX - panStartRef.current.x, y: e.clientY - panStartRef.current.y });
-  };
-  const handleMouseUp = () => setIsPanning(false);
+  }, [modules, activeCanvasId]);
 
   // --- CANVAS MANAGEMENT ---
   const handleCreateCanvas = () => {
@@ -102,14 +84,14 @@ export default function UnderworldMapper() {
     
     let initialRotation = 0;
 
-    if (parentJunction) {
-      const requiredGlobalDir = DIRECTION_OFFSETS[parentJunction].opposite;
-      const validAngles = getValidRotations(template.junctions, requiredGlobalDir);
-      
-      if (validAngles.length === 0) {
-        alert("This module does not have the required junction to connect here!");
-        return;
-      }
+    const requiredDirs = getRequiredDirections(x, y, modules);
+    const validAngles = getValidRotationsMulti(template.junctions, requiredDirs);
+
+    if (requiredDirs.length > 0 && validAngles.length === 0) {
+      alert("This module does not have the required junctions to connect here!");
+      return;
+    }
+    if (validAngles.length > 0) {
       initialRotation = validAngles[0];
     }
 
@@ -149,13 +131,35 @@ export default function UnderworldMapper() {
 
   const handleDeleteModule = (key, e) => {
     e.stopPropagation();
+
+    // Collect the target module and all descendants via parentKey (BFS)
+    const toDelete = new Set([key]);
+    let queue = [key];
+    while (queue.length > 0) {
+      const nextQueue = [];
+      queue.forEach(pKey => {
+        Object.keys(modules).forEach(k => {
+          if (modules[k].parentKey === pKey) {
+            toDelete.add(k);
+            nextQueue.push(k);
+          }
+        });
+      });
+      queue = nextQueue;
+    }
+
+    const childCount = toDelete.size - 1;
+    if (childCount > 0 && !window.confirm(`Deleting this room will also remove ${childCount} connected room(s). Continue?`)) {
+      return;
+    }
+
     setCanvases(prev => prev.map(canvas => {
       if (canvas.id !== activeCanvasId) return canvas;
       const updatedModules = { ...canvas.modules };
-      delete updatedModules[key];
+      toDelete.forEach(k => delete updatedModules[k]);
       return { ...canvas, modules: updatedModules };
     }));
-    if (hoveredModuleKey === key) setHoveredModuleKey(null);
+    if (toDelete.has(hoveredModuleKeyRef.current)) hoveredModuleKeyRef.current = null;
   };
 
   // --- NODE RENDERING ---
@@ -223,34 +227,54 @@ export default function UnderworldMapper() {
         onRenameCanvas={handleRenameCanvas}
       />
 
-      <main 
-        className={`flex-1 relative overflow-hidden h-full ${isPanning ? 'cursor-grabbing' : 'cursor-grab'}`}
-        onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}
-      >
-        {/* The background dots and radial gradient have been completely removed here */}
-        <div className="absolute inset-0 w-full h-full bg-tactical-bg"
-          style={{ transform: `translate(${panOffset.x}px, ${panOffset.y}px)`, transition: isPanning ? 'none' : 'transform 0.05s ease-out' }}>
-          
-          {Object.entries(modules).map(([key, mod]) => {
+      <main className="flex-1 relative overflow-hidden h-full">
+        <TransformWrapper
+          initialScale={1}
+          minScale={0.7}
+          maxScale={2.5}
+          limitToBounds={false}
+          smooth={false}
+          wheel={{ step: 0.308 }}
+          doubleClick={{ disabled: true }}
+          panning={{ excluded: ['interactive-node'] }}
+        >
+          <TransformComponent
+            wrapperStyle={{ width: '100%', height: '100%' }}
+            contentStyle={{ width: '100%', height: '100%' }}
+          >
+            <div className="w-full h-full bg-tactical-bg relative">
+
+              {Object.entries(modules).map(([key, mod]) => {
             const tmpl = MODULE_TEMPLATES[mod.templateId];
             if (!tmpl) return null;
-            const isHovered = hoveredModuleKey === key;
 
-            // Retaining subtle accent colors for functional readability, but styled as tactical panels
-            let themeClass = "bg-tactical-panel border-indigo-500/50 text-indigo-300";
-            if (tmpl.category === 'outer') themeClass = "bg-tactical-panel border-emerald-500/50 text-emerald-300";
-            if (tmpl.category === 'boss') themeClass = "bg-tactical-panel border-rose-500/50 text-rose-300";
+            const themeClass = CATEGORY_META[tmpl.category]?.cardTheme ?? "bg-tactical-panel border-indigo-500/50 text-indigo-300";
+            const bgUrl = getBgUrl(mod.templateId);
 
             return (
               <div
-                key={key} onMouseEnter={() => setHoveredModuleKey(key)} onMouseLeave={() => setHoveredModuleKey(null)}
-                className={`absolute rounded border p-3 flex flex-col justify-between transition shadow-xl ${themeClass}`}
+                key={key}
+                onMouseEnter={() => { hoveredModuleKeyRef.current = key; }}
+                onMouseLeave={() => { hoveredModuleKeyRef.current = null; }}
+                className={`group absolute rounded border p-3 flex flex-col justify-between transition shadow-xl overflow-hidden ${themeClass}`}
                 style={{
                   width: `${CELL_SIZE - 12}px`, height: `${CELL_SIZE - 12}px`,
                   left: `calc(50% + ${mod.x * CELL_SIZE}px - ${(CELL_SIZE - 12) / 2}px)`,
                   top: `calc(50% + ${mod.y * CELL_SIZE}px - ${(CELL_SIZE - 12) / 2}px)`
                 }}
               >
+                {bgUrl && (
+                  <div
+                    className="absolute inset-0 pointer-events-none"
+                    style={{
+                      backgroundImage: `url(${bgUrl})`,
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                      transform: `rotate(${mod.rotation}deg) scale(1.5)`,
+                      opacity: 0.35,
+                    }}
+                  />
+                )}
                 <div className="flex justify-between items-start">
                   <div className="flex flex-col">
                     <span className="text-[12px] font-bold tracking-tight truncate w-24">{tmpl.name}</span>
@@ -272,7 +296,7 @@ export default function UnderworldMapper() {
                   </div>
                 )}
 
-                <div className={`flex items-center justify-end gap-1 transition-opacity ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
+                <div className="flex items-center justify-end gap-1 transition-opacity opacity-0 group-hover:opacity-100">
                   <button onClick={(e) => handleDeleteModule(key, e)} className="p-1.5 bg-tactical-bg border border-tactical-border hover:bg-tactical-btn hover:border-rose-500 rounded text-tactical-muted hover:text-rose-400 cursor-pointer transition" title="Demolish Room">
                     <Trash2 size={12} />
                   </button>
@@ -289,8 +313,10 @@ export default function UnderworldMapper() {
             );
           })}
 
-          {renderPlusButtons()}
-        </div>
+              {renderPlusButtons()}
+            </div>
+          </TransformComponent>
+        </TransformWrapper>
       </main>
 
       <RightSidebar />

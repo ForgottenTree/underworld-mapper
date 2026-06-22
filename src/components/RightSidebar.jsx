@@ -1,13 +1,7 @@
 import { HelpCircle, LayoutGrid } from 'lucide-react';
-import { MODULE_TEMPLATES } from '../constants/mapData';
+import { MODULE_TEMPLATES, CATEGORY_META } from '../constants/mapData';
 
 export default function RightSidebar() {
-  const categories = {
-    outer: { name: 'Outer Modules', border: 'border-l-emerald-500/50' },
-    inner: { name: 'Inner Modules', border: 'border-l-indigo-500/50' },
-    boss: { name: 'Boss Modules', border: 'border-l-rose-500/50' }
-  };
-
   const handleDragStart = (e, templateId) => {
     e.dataTransfer.setData('templateId', templateId);
   };
@@ -29,18 +23,18 @@ export default function RightSidebar() {
           <p>• Hover over a room and press <kbd className="bg-tactical-btn px-1 border border-tactical-border rounded text-tactical-text font-mono text-[10px]">R</kbd> to rotate.</p>
         </div>
 
-        {Object.entries(categories).map(([catKey, catInfo]) => (
+        {Object.entries(CATEGORY_META).map(([catKey, meta]) => (
           <div key={catKey} className="space-y-2">
-            <h3 className="text-[12px] font-bold text-tactical-muted uppercase tracking-wide px-1">{catInfo.name}</h3>
+            <h3 className="text-[12px] font-bold text-tactical-muted uppercase tracking-wide px-1">{meta.label}</h3>
             <div className="grid grid-cols-1 gap-1">
               {Object.values(MODULE_TEMPLATES)
                 .filter(t => t.category === catKey)
                 .map(tmpl => (
-                  <div 
-                    key={tmpl.id} 
+                  <div
+                    key={tmpl.id}
                     draggable
                     onDragStart={(e) => handleDragStart(e, tmpl.id)}
-                    className={`p-2 bg-tactical-bg border border-tactical-border border-l-2 rounded flex items-center justify-between cursor-grab active:cursor-grabbing hover:border-tactical-accent transition ${catInfo.border}`}
+                    className={`p-2 bg-tactical-bg border border-tactical-border border-l-2 rounded flex items-center justify-between cursor-grab active:cursor-grabbing hover:border-tactical-accent transition ${meta.sidebarBorder}`}
                   >
                     <span className="font-medium text-tactical-text">{tmpl.name}</span>
                     <span className="text-[11px] text-tactical-muted uppercase font-mono">

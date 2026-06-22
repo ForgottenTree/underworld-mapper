@@ -1,14 +1,8 @@
 import { X } from 'lucide-react';
-import { MODULE_TEMPLATES } from '../constants/mapData';
+import { MODULE_TEMPLATES, CATEGORY_META } from '../constants/mapData';
 
 export default function ModuleSelectorModal({ isOpen, onClose, onSelect, isFirstModule }) {
   if (!isOpen) return null;
-
-  const categories = {
-    outer: { title: 'Outer Entries', highlight: 'border-emerald-500/30' },
-    inner: { title: 'Inner Paths', highlight: 'border-indigo-500/30' },
-    boss: { title: 'Boss Lairs', highlight: 'border-rose-500/30' }
-  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#12151b]/80 backdrop-blur-sm p-4 animate-fade-in text-[14px]">
@@ -22,32 +16,31 @@ export default function ModuleSelectorModal({ isOpen, onClose, onSelect, isFirst
         </div>
 
         <div className="p-5 overflow-y-auto space-y-6">
-          {Object.entries(categories).map(([catKey, catStyle]) => (
+          {Object.entries(CATEGORY_META).map(([catKey, meta]) => (
             <div key={catKey} className="space-y-3">
-              <h4 className="text-[12px] font-bold text-tactical-text uppercase tracking-wide border-b border-tactical-divider pb-1">{catStyle.title}</h4>
+              <h4 className="text-[12px] font-bold text-tactical-text uppercase tracking-wide border-b border-tactical-divider pb-1">{meta.modalTitle}</h4>
               <div className="grid grid-cols-2 gap-2">
                 {Object.values(MODULE_TEMPLATES)
                   .filter(m => m.category === catKey)
                   .map(tmpl => {
                     const isDisabled = isFirstModule && tmpl.category !== 'outer';
-                    
                     return (
                       <button
                         key={tmpl.id}
                         disabled={isDisabled}
                         onClick={() => onSelect(tmpl.id)}
                         className={`p-3 text-left border rounded flex flex-col gap-1 transition ${
-                          isDisabled 
-                            ? 'opacity-40 cursor-not-allowed border-tactical-divider bg-tactical-bg' 
-                            : `bg-tactical-bg border-tactical-border hover:bg-tactical-btn hover:border-tactical-accent cursor-pointer text-tactical-text`
+                          isDisabled
+                            ? 'opacity-40 cursor-not-allowed border-tactical-divider bg-tactical-bg'
+                            : 'bg-tactical-bg border-tactical-border hover:bg-tactical-btn hover:border-tactical-accent cursor-pointer text-tactical-text'
                         }`}
                       >
-                        <span className="font-semibold border-l-2 pl-2 ${catStyle.highlight}">{tmpl.name}</span>
+                        <span className={`font-semibold border-l-2 pl-2 ${meta.modalHighlight}`}>{tmpl.name}</span>
                         <span className="text-[11px] text-tactical-muted capitalize pl-2">
                           Exits: {tmpl.junctions.join(', ')}
                         </span>
                       </button>
-                    )
+                    );
                   })}
               </div>
             </div>
