@@ -4,6 +4,6 @@ import tailwindcss from '@tailwindcss/vite'
 
 
 export default defineConfig({
-  base: 'https://github.com/ForgottenTree/underworld-mapper',
+  base: '/underworld-mapper/',
   plugins: [react(),tailwindcss()],
 })
