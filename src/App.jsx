@@ -1,4 +1,3 @@
-// src/App.jsx
 import { useState, useEffect, useRef } from 'react';
 import { RotateCw, Trash2 } from 'lucide-react';
 import { MODULE_TEMPLATES, DIRECTION_OFFSETS, ROTATIONS, CELL_SIZE } from './constants/mapData';
@@ -131,7 +130,6 @@ export default function UnderworldMapper() {
     setActivePlusTarget(null);
   };
 
-  // --- DRAG AND DROP HANDLERS ---
   const handleDragOver = (e) => {
     e.preventDefault();
   };
@@ -162,6 +160,9 @@ export default function UnderworldMapper() {
 
   // --- NODE RENDERING ---
   const renderPlusButtons = () => {
+    // Tactical styling directly pulled from the Old Guards buttons
+    const tacticalBtnClass = "bg-[#1f2938] border border-[#506789] text-[#f3f7ff] hover:bg-[#334057] hover:border-tactical-accent focus:outline-none focus:ring-1 focus:ring-tactical-accent";
+
     if (isMapEmpty) {
       const targetParams = { x: 0, y: 0, parentKey: null, parentJunction: null };
       return (
@@ -169,7 +170,7 @@ export default function UnderworldMapper() {
           onClick={() => { setActivePlusTarget(targetParams); setShowSelectorModal(true); }}
           onDragOver={handleDragOver}
           onDrop={(e) => handleDrop(e, targetParams)}
-          className="absolute w-12 h-12 bg-indigo-600 hover:bg-indigo-500 rounded-full flex items-center justify-center text-white text-xl font-bold shadow-xl shadow-indigo-500/30 transition transform hover:scale-110 z-10 cursor-pointer interactive-node border-2 border-indigo-400"
+          className={`absolute w-12 h-12 rounded flex items-center justify-center text-xl font-bold transition transform hover:scale-105 z-10 cursor-pointer interactive-node shadow-lg ${tacticalBtnClass}`}
           style={{ top: 'calc(50% - 24px)', left: 'calc(50% - 24px)' }}
         >
           +
@@ -202,7 +203,7 @@ export default function UnderworldMapper() {
         onClick={() => { setActivePlusTarget(t); setShowSelectorModal(true); }}
         onDragOver={handleDragOver}
         onDrop={(e) => handleDrop(e, t)}
-        className="absolute w-8 h-8 bg-indigo-600/80 hover:bg-indigo-500 text-white font-bold rounded-full flex items-center justify-center text-sm shadow-md transition transform hover:scale-110 z-10 cursor-pointer border border-indigo-400 interactive-node"
+        className={`absolute w-8 h-8 rounded flex items-center justify-center text-sm transition transform hover:scale-110 z-10 cursor-pointer interactive-node shadow-md ${tacticalBtnClass}`}
         style={{ left: `calc(50% + ${t.x * CELL_SIZE}px - 16px)`, top: `calc(50% + ${t.y * CELL_SIZE}px - 16px)` }}
       >
         +
@@ -211,7 +212,7 @@ export default function UnderworldMapper() {
   };
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-slate-950 font-sans text-slate-200 select-none">
+    <div className="flex h-screen w-screen overflow-hidden bg-tactical-bg font-sans text-tactical-text select-none">
       
       <LeftSidebar
         canvases={canvases} 
@@ -226,7 +227,8 @@ export default function UnderworldMapper() {
         className={`flex-1 relative overflow-hidden h-full ${isPanning ? 'cursor-grabbing' : 'cursor-grab'}`}
         onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}
       >
-        <div className="absolute inset-0 w-full h-full"
+        {/* The background dots and radial gradient have been completely removed here */}
+        <div className="absolute inset-0 w-full h-full bg-tactical-bg"
           style={{ transform: `translate(${panOffset.x}px, ${panOffset.y}px)`, transition: isPanning ? 'none' : 'transform 0.05s ease-out' }}>
           
           {Object.entries(modules).map(([key, mod]) => {
@@ -234,14 +236,15 @@ export default function UnderworldMapper() {
             if (!tmpl) return null;
             const isHovered = hoveredModuleKey === key;
 
-            let themeClass = "bg-slate-900 border-indigo-500/40 text-indigo-400";
-            if (tmpl.category === 'outer') themeClass = "bg-slate-900 border-emerald-500/40 text-emerald-400";
-            if (tmpl.category === 'boss') themeClass = "bg-slate-900 border-rose-500/40 text-rose-400";
+            // Retaining subtle accent colors for functional readability, but styled as tactical panels
+            let themeClass = "bg-tactical-panel border-indigo-500/50 text-indigo-300";
+            if (tmpl.category === 'outer') themeClass = "bg-tactical-panel border-emerald-500/50 text-emerald-300";
+            if (tmpl.category === 'boss') themeClass = "bg-tactical-panel border-rose-500/50 text-rose-300";
 
             return (
               <div
                 key={key} onMouseEnter={() => setHoveredModuleKey(key)} onMouseLeave={() => setHoveredModuleKey(null)}
-                className={`absolute rounded-xl border-2 p-3 flex flex-col justify-between transition shadow-xl ${themeClass}`}
+                className={`absolute rounded border p-3 flex flex-col justify-between transition shadow-xl ${themeClass}`}
                 style={{
                   width: `${CELL_SIZE - 12}px`, height: `${CELL_SIZE - 12}px`,
                   left: `calc(50% + ${mod.x * CELL_SIZE}px - ${(CELL_SIZE - 12) / 2}px)`,
@@ -250,37 +253,37 @@ export default function UnderworldMapper() {
               >
                 <div className="flex justify-between items-start">
                   <div className="flex flex-col">
-                    <span className="text-[11px] font-bold tracking-tight text-slate-100 truncate w-24">{tmpl.name}</span>
-                    <span className="text-[9px] opacity-50 font-mono">({mod.x}, {mod.y})</span>
+                    <span className="text-[12px] font-bold tracking-tight truncate w-24">{tmpl.name}</span>
+                    <span className="text-[10px] opacity-60 font-mono text-tactical-muted">({mod.x}, {mod.y})</span>
                   </div>
-                  <div className="transition-transform duration-200" style={{ transform: `rotate(${mod.rotation}deg)` }}>
-                    <RotateCw size={11} className="opacity-60" />
+                  <div className="transition-transform duration-200 text-tactical-muted" style={{ transform: `rotate(${mod.rotation}deg)` }}>
+                    <RotateCw size={12} />
                   </div>
                 </div>
 
                 {tmpl.visual === 'entrance' && (
                   <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <div className="w-3.5 h-3.5 bg-emerald-500 rounded-full animate-pulse shadow-md shadow-emerald-500/50 border border-white/20" />
+                    <div className="w-3 h-3 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)] border border-white/20" />
                   </div>
                 )}
                 {tmpl.visual === 'boss' && (
                   <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <div className="w-4 h-4 bg-rose-600 rounded-xs rotate-45 border border-white/20 shadow-md shadow-rose-500/40" />
+                    <div className="w-3.5 h-3.5 bg-rose-600 rounded-xs rotate-45 border border-white/20 shadow-[0_0_8px_rgba(225,29,72,0.5)]" />
                   </div>
                 )}
 
                 <div className={`flex items-center justify-end gap-1 transition-opacity ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
-                  <button onClick={(e) => handleDeleteModule(key, e)} className="p-1 bg-slate-800 hover:bg-rose-950 hover:text-rose-400 rounded text-slate-400 cursor-pointer" title="Demolish Room">
-                    <Trash2 size={11} />
+                  <button onClick={(e) => handleDeleteModule(key, e)} className="p-1.5 bg-tactical-bg border border-tactical-border hover:bg-tactical-btn hover:border-rose-500 rounded text-tactical-muted hover:text-rose-400 cursor-pointer transition" title="Demolish Room">
+                    <Trash2 size={12} />
                   </button>
                 </div>
 
                 {getGlobalJunctions(tmpl.junctions, mod.rotation).map(dir => {
                   const positions = {
-                    top: "top-[-3px] left-1/2 -translate-x-1/2 w-4 h-1", bottom: "bottom-[-3px] left-1/2 -translate-x-1/2 w-4 h-1",
-                    left: "left-[-3px] top-1/2 -translate-y-1/2 w-1 h-4", right: "right-[-3px] top-1/2 -translate-y-1/2 w-1 h-4"
+                    top: "top-[-4px] left-1/2 -translate-x-1/2 w-4 h-1.5", bottom: "bottom-[-4px] left-1/2 -translate-x-1/2 w-4 h-1.5",
+                    left: "left-[-4px] top-1/2 -translate-y-1/2 w-1.5 h-4", right: "right-[-4px] top-1/2 -translate-y-1/2 w-1.5 h-4"
                   };
-                  return <div key={dir} className={`absolute rounded-full bg-current ${positions[dir]}`} />;
+                  return <div key={dir} className={`absolute rounded-xs bg-current ${positions[dir]}`} />;
                 })}
               </div>
             );

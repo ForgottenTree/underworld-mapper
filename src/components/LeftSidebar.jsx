@@ -1,4 +1,3 @@
-// src/components/LeftSidebar.jsx
 import { useState } from 'react';
 import { Plus, Trash2, Folder, Edit2, Check, X } from 'lucide-react';
 
@@ -28,14 +27,14 @@ export default function LeftSidebar({
   };
 
   return (
-    <aside className="w-66 bg-slate-900 border-r border-slate-800 flex flex-col h-full z-20 shadow-2xl shrink-0 text-slate-200">
-      <div className="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/40">
+    <aside className="w-64 bg-tactical-panel border-r border-tactical-border flex flex-col h-full z-20 shrink-0 text-[14px]">
+      <div className="p-3 border-b border-tactical-border flex items-center justify-between bg-tactical-input/50">
         <div className="flex items-center gap-2">
-          <Folder className="text-indigo-400" size={18} />
-          <h2 className="font-bold text-sm tracking-wide uppercase text-slate-400">Cave Systems</h2>
+          <Folder className="text-tactical-accent" size={16} />
+          <h2 className="font-bold text-[12px] uppercase text-tactical-muted tracking-wide">Cave Systems</h2>
         </div>
-        <button onClick={onCreateCanvas} className="p-1.5 hover:bg-slate-800 rounded text-emerald-400 transition" title="New Map">
-          <Plus size={16} />
+        <button onClick={onCreateCanvas} className="p-1 hover:bg-tactical-btn-hover bg-tactical-btn border border-tactical-input-border rounded text-tactical-text transition" title="New Map">
+          <Plus size={14} />
         </button>
       </div>
 
@@ -48,10 +47,10 @@ export default function LeftSidebar({
             <li
               key={canvas.id}
               onClick={() => !isEditing && setActiveCanvasId(canvas.id)}
-              className={`group flex items-center justify-between p-2.5 rounded-lg transition-all cursor-pointer border ${
+              className={`group flex items-center justify-between p-2 rounded cursor-pointer border transition-colors min-h-[32px] ${
                 isActive 
-                  ? 'bg-indigo-600/15 border-indigo-500/30 text-white font-medium shadow-sm' 
-                  : 'border-transparent hover:bg-slate-800/60 text-slate-400 hover:text-slate-200'
+                  ? 'bg-[#1f2938] border-[#506789] text-[#f3f7ff]' 
+                  : 'border-transparent hover:bg-tactical-btn text-tactical-muted hover:text-tactical-text'
               }`}
             >
               {isEditing ? (
@@ -60,35 +59,35 @@ export default function LeftSidebar({
                     type="text"
                     value={editName}
                     onChange={e => setEditName(e.target.value)}
-                    className="bg-slate-950 border border-indigo-500 rounded px-2 py-1 text-xs text-white focus:outline-none w-full"
+                    className="bg-tactical-input border border-tactical-accent outline-none rounded px-2 py-0.5 text-xs text-tactical-text w-full"
                     autoFocus
                     onKeyDown={e => e.key === 'Enter' && saveRename(e)}
                   />
-                  <button onClick={saveRename} className="p-1 hover:bg-slate-800 rounded text-emerald-400">
+                  <button onClick={saveRename} className="p-1 hover:bg-tactical-btn rounded text-tactical-text">
                     <Check size={14} />
                   </button>
-                  <button onClick={() => setEditingId(null)} className="p-1 hover:bg-slate-800 rounded text-rose-400">
+                  <button onClick={() => setEditingId(null)} className="p-1 hover:bg-tactical-btn rounded text-tactical-text">
                     <X size={14} />
                   </button>
                 </div>
               ) : (
                 <>
-                  <span className="truncate pr-2 text-sm">{canvas.name}</span>
-                  <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                  <span className="truncate pr-2">{canvas.name}</span>
+                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
                     <button 
                       onClick={(e) => startEditing(canvas, e)} 
-                      className="p-1 hover:bg-slate-800 rounded text-slate-400 hover:text-indigo-400 transition"
+                      className="p-1 hover:bg-tactical-btn-hover rounded text-tactical-muted hover:text-tactical-text transition"
                       title="Rename"
                     >
-                      <Edit2 size={13} />
+                      <Edit2 size={12} />
                     </button>
                     {canvases.length > 1 && (
                       <button 
                         onClick={(e) => onDeleteCanvas(canvas.id, e)} 
-                        className="p-1 hover:bg-slate-800 rounded text-slate-400 hover:text-rose-400 transition"
+                        className="p-1 hover:bg-tactical-btn-hover rounded text-tactical-muted hover:text-rose-400 transition"
                         title="Delete Map"
                       >
-                        <Trash2 size={13} />
+                        <Trash2 size={12} />
                       </button>
                     )}
                   </div>

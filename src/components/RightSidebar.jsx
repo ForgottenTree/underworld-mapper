@@ -1,12 +1,11 @@
-// src/components/RightSidebar.jsx
 import { HelpCircle, LayoutGrid } from 'lucide-react';
 import { MODULE_TEMPLATES } from '../constants/mapData';
 
 export default function RightSidebar() {
   const categories = {
-    outer: { name: 'Outer Modules', color: 'border-emerald-500 text-emerald-400 bg-emerald-500/10' },
-    inner: { name: 'Inner Modules', color: 'border-indigo-500 text-indigo-400 bg-indigo-500/10' },
-    boss: { name: 'Boss Arena Modules', color: 'border-rose-500 text-rose-400 bg-rose-500/10' }
+    outer: { name: 'Outer Modules', border: 'border-l-emerald-500/50' },
+    inner: { name: 'Inner Modules', border: 'border-l-indigo-500/50' },
+    boss: { name: 'Boss Modules', border: 'border-l-rose-500/50' }
   };
 
   const handleDragStart = (e, templateId) => {
@@ -14,28 +13,26 @@ export default function RightSidebar() {
   };
 
   return (
-    <aside className="w-66 bg-slate-900 border-l border-slate-800 flex flex-col h-full z-20 shadow-2xl shrink-0 text-slate-200">
-      <div className="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/40">
-        <div className="flex items-center gap-2">
-          <LayoutGrid className="text-indigo-400" size={18} />
-          <h2 className="font-bold text-sm tracking-wide uppercase text-slate-400">Room Assets</h2>
-        </div>
+    <aside className="w-64 bg-tactical-panel border-l border-tactical-border flex flex-col h-full z-20 shrink-0 text-[14px]">
+      <div className="p-3 border-b border-tactical-border flex items-center gap-2 bg-tactical-input/50">
+        <LayoutGrid className="text-tactical-accent" size={16} />
+        <h2 className="font-bold text-[12px] uppercase text-tactical-muted tracking-wide">Room Assets</h2>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-5">
-        <div className="bg-slate-950/50 border border-slate-800 rounded-xl p-3 text-xs text-slate-400 space-y-2">
-          <div className="flex items-center gap-1.5 font-semibold text-slate-300 border-b border-slate-800 pb-1.5 mb-1.5">
-            <HelpCircle size={14} className="text-indigo-400" />
+      <div className="flex-1 overflow-y-auto p-3 flex flex-col gap-6">
+        <div className="bg-tactical-input border border-tactical-border rounded p-3 text-[12px] text-tactical-muted space-y-2">
+          <div className="flex items-center gap-1.5 font-bold text-tactical-text border-b border-tactical-divider pb-2 mb-2">
+            <HelpCircle size={14} className="text-tactical-accent" />
             <span>Map Controls Guide</span>
           </div>
-          <p>• <b className="text-slate-300">Drag & Drop:</b> Pull assets directly onto a blue <b className="text-indigo-400 font-bold">+</b> node.</p>
-          <p>• <b className="text-slate-300">Rotate Module:</b> Hover over a room and press <kbd className="bg-slate-800 px-1 rounded text-white text-[10px]">R</kbd>.</p>
+          <p>• Drag & Drop assets directly onto a connection node.</p>
+          <p>• Hover over a room and press <kbd className="bg-tactical-btn px-1 border border-tactical-border rounded text-tactical-text font-mono text-[10px]">R</kbd> to rotate.</p>
         </div>
 
         {Object.entries(categories).map(([catKey, catInfo]) => (
           <div key={catKey} className="space-y-2">
-            <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider px-1">{catInfo.name}</h3>
-            <div className="grid grid-cols-1 gap-1.5">
+            <h3 className="text-[12px] font-bold text-tactical-muted uppercase tracking-wide px-1">{catInfo.name}</h3>
+            <div className="grid grid-cols-1 gap-1">
               {Object.values(MODULE_TEMPLATES)
                 .filter(t => t.category === catKey)
                 .map(tmpl => (
@@ -43,10 +40,10 @@ export default function RightSidebar() {
                     key={tmpl.id} 
                     draggable
                     onDragStart={(e) => handleDragStart(e, tmpl.id)}
-                    className={`p-2 rounded-lg border text-xs flex items-center justify-between cursor-grab active:cursor-grabbing hover:brightness-125 transition ${catInfo.color}`}
+                    className={`p-2 bg-tactical-bg border border-tactical-border border-l-2 rounded flex items-center justify-between cursor-grab active:cursor-grabbing hover:border-tactical-accent transition ${catInfo.border}`}
                   >
-                    <span className="font-medium text-slate-200">{tmpl.name}</span>
-                    <span className="text-[10px] opacity-60 uppercase font-mono">
+                    <span className="font-medium text-tactical-text">{tmpl.name}</span>
+                    <span className="text-[11px] text-tactical-muted uppercase font-mono">
                       {tmpl.junctions.length} Jnc
                     </span>
                   </div>

@@ -1,1 +1,25 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600;700&display=swap');
+
+@theme {
+  /* Inject the custom palette into Tailwind */
+  --font-sans: 'Jost', Arial, sans-serif;
+  
+  --color-tactical-bg: #12151b;
+  --color-tactical-panel: #1b2029;
+  --color-tactical-border: #303846;
+  --color-tactical-divider: #2b3340;
+  --color-tactical-text: #e7eaf0;
+  --color-tactical-muted: #9aa4b4;
+  --color-tactical-btn: #283244;
+  --color-tactical-btn-hover: #334057;
+  --color-tactical-input: #11151c;
+  --color-tactical-input-border: #3a4352;
+  --color-tactical-accent: #7ea6e0;
+}
+
+body {
+  background-color: var(--color-tactical-bg);
+  color: var(--color-tactical-text);
+  font-family: var(--font-sans);
+}
