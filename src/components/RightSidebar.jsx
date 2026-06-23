@@ -1,15 +1,21 @@
 import { useState } from 'react';
-import { HelpCircle, LayoutGrid, Type, Hash, RotateCw, Circle, ChevronDown } from 'lucide-react';
+import { HelpCircle, LayoutGrid, Type, Hash, RotateCw, Circle, ChevronDown, Square, Maximize2, Link } from 'lucide-react';
 import { MODULE_TEMPLATES, CATEGORY_META, getTemplateLabel } from '../constants/mapData';
 
-const LAYERS = [
+const LAYERS_ROW1 = [
   { key: 'name',        label: 'Name',        Icon: Type },
   { key: 'coordinates', label: 'Coordinates',  Icon: Hash },
   { key: 'rotation',    label: 'Rotation',     Icon: RotateCw },
   { key: 'dots',        label: 'Markers',      Icon: Circle },
 ];
 
-export default function RightSidebar({ showId, setShowId, visibleLayers, setVisibleLayers }) {
+const LAYERS_ROW2 = [
+  { key: 'borders',   label: 'Borders',   Icon: Square },
+  { key: 'junctions', label: 'Junctions', Icon: Link },
+  { key: 'padding',   label: 'Padding',   Icon: Maximize2 },
+];
+
+export default function RightSidebar({ showId, setShowId, visibleLayers, setVisibleLayers, bgOpacity, setBgOpacity }) {
   const [helpOpen, setHelpOpen] = useState(false);
 
   const handleDragStart = (e, templateId) => {
@@ -77,13 +83,13 @@ export default function RightSidebar({ showId, setShowId, visibleLayers, setVisi
 
           <div className="space-y-1.5">
             <span className="text-[11px] text-tactical-muted">Layers</span>
-            <div className="flex gap-1">
-              {LAYERS.map(({ key, label, Icon }) => (
+            <div className="grid grid-cols-4 gap-1">
+              {LAYERS_ROW1.map(({ key, label, Icon }) => (
                 <button
                   key={key}
                   onClick={() => toggleLayer(key)}
                   title={label}
-                  className={`flex-1 flex items-center justify-center py-1.5 rounded border transition ${
+                  className={`flex items-center justify-center py-1.5 rounded border transition ${
                     visibleLayers[key]
                       ? 'bg-tactical-accent/10 border-tactical-accent/50 text-tactical-accent'
                       : 'bg-tactical-bg border-tactical-border text-tactical-muted hover:text-tactical-text hover:border-tactical-input-border'
@@ -93,6 +99,38 @@ export default function RightSidebar({ showId, setShowId, visibleLayers, setVisi
                 </button>
               ))}
             </div>
+            <div className="grid grid-cols-4 gap-1">
+              {LAYERS_ROW2.map(({ key, label, Icon, text }) => (
+                <button
+                  key={key}
+                  onClick={() => toggleLayer(key)}
+                  title={label}
+                  className={`flex items-center justify-center py-1.5 rounded border transition ${
+                    visibleLayers[key]
+                      ? 'bg-tactical-accent/10 border-tactical-accent/50 text-tactical-accent'
+                      : 'bg-tactical-bg border-tactical-border text-tactical-muted hover:text-tactical-text hover:border-tactical-input-border'
+                  }`}
+                >
+                  {text ? <span className="text-[11px] font-bold font-mono">{text}</span> : <Icon size={13} />}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] text-tactical-muted">Background Opacity</span>
+              <span className="text-[11px] font-mono text-tactical-muted">{Math.round(bgOpacity * 100)}%</span>
+            </div>
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.01"
+              value={bgOpacity}
+              onChange={e => setBgOpacity(parseFloat(e.target.value))}
+              className="w-full h-1.5 rounded appearance-none bg-tactical-border cursor-pointer accent-tactical-accent"
+            />
           </div>
         </div>
 

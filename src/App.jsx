@@ -25,7 +25,8 @@ export default function UnderworldMapper() {
   const hoveredModuleKeyRef = useRef(null);
 
   const [showId, setShowId] = useState(false);
-  const [visibleLayers, setVisibleLayers] = useState({ name: true, coordinates: true, rotation: true, dots: true });
+  const [visibleLayers, setVisibleLayers] = useState({ name: true, coordinates: true, rotation: true, dots: true, borders: true, junctions: true, padding: true });
+  const [bgOpacity, setBgOpacity] = useState(0.35);
 
   useEffect(() => {
     localStorage.setItem('underworld_maps', JSON.stringify(canvases));
@@ -236,7 +237,7 @@ export default function UnderworldMapper() {
         <TransformWrapper
           initialScale={1}
           minScale={0.7}
-          maxScale={2.5}
+          maxScale={4}
           limitToBounds={false}
           smooth={false}
           wheel={{ step: 0.308 }}
@@ -261,12 +262,15 @@ export default function UnderworldMapper() {
                 key={key}
                 onMouseEnter={() => { hoveredModuleKeyRef.current = key; }}
                 onMouseLeave={() => { hoveredModuleKeyRef.current = null; }}
-                className={`group absolute rounded border p-3 flex flex-col justify-between transition shadow-xl overflow-hidden ${themeClass}`}
-                style={{
-                  width: `${CELL_SIZE - 12}px`, height: `${CELL_SIZE - 12}px`,
-                  left: `calc(50% + ${mod.x * CELL_SIZE}px - ${(CELL_SIZE - 12) / 2}px)`,
-                  top: `calc(50% + ${mod.y * CELL_SIZE}px - ${(CELL_SIZE - 12) / 2}px)`
-                }}
+                className={`group absolute ${visibleLayers.padding ? 'rounded' : ''} ${visibleLayers.borders ? 'border' : ''} p-3 flex flex-col justify-between transition shadow-xl overflow-hidden ${themeClass}`}
+                style={(() => {
+                  const s = visibleLayers.padding ? CELL_SIZE - 12 : CELL_SIZE;
+                  return {
+                    width: `${s}px`, height: `${s}px`,
+                    left: `calc(50% + ${mod.x * CELL_SIZE}px - ${s / 2}px)`,
+                    top: `calc(50% + ${mod.y * CELL_SIZE}px - ${s / 2}px)`
+                  };
+                })()}
               >
                 {bgUrl && (
                   <div
@@ -275,8 +279,8 @@ export default function UnderworldMapper() {
                       backgroundImage: `url(${bgUrl})`,
                       backgroundSize: 'cover',
                       backgroundPosition: 'center',
-                      transform: `rotate(${mod.rotation}deg) scale(1.5)`,
-                      opacity: 0.35,
+                      transform: `rotate(${mod.rotation}deg) scale(1)`,
+                      opacity: bgOpacity,
                     }}
                   />
                 )}
@@ -317,7 +321,7 @@ export default function UnderworldMapper() {
                   </button>
                 </div>
 
-                {getGlobalJunctions(tmpl.junctions, mod.rotation).map(dir => {
+                {visibleLayers.junctions && getGlobalJunctions(tmpl.junctions, mod.rotation).map(dir => {
                   const positions = {
                     top: "top-[-4px] left-1/2 -translate-x-1/2 w-4 h-1.5", bottom: "bottom-[-4px] left-1/2 -translate-x-1/2 w-4 h-1.5",
                     left: "left-[-4px] top-1/2 -translate-y-1/2 w-1.5 h-4", right: "right-[-4px] top-1/2 -translate-y-1/2 w-1.5 h-4"
@@ -339,6 +343,8 @@ export default function UnderworldMapper() {
         setShowId={setShowId}
         visibleLayers={visibleLayers}
         setVisibleLayers={setVisibleLayers}
+        bgOpacity={bgOpacity}
+        setBgOpacity={setBgOpacity}
       />
 
       <ModuleSelectorModal
