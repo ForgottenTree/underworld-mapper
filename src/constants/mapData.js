@@ -45,3 +45,5 @@ export const DIRECTION_OFFSETS = {
 
 export const ROTATIONS = [0, 90, 180, 270];
 export const CELL_SIZE = 160; // Size of each module square on the grid in pixels
+
+export const getTemplateLabel = (tmpl, showId) => tmpl[showId ? 'id' : 'name'];

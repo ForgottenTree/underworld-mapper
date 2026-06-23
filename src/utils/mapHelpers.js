@@ -3,11 +3,11 @@ import { ROTATIONS, DIRECTION_OFFSETS, MODULE_TEMPLATES } from '../constants/map
 
 export function getGlobalJunctions(templateJunctions, rotation) {
   const directions = ['top', 'right', 'bottom', 'left'];
-  return templateJunctions.map(localDir => {
+  const shift = rotation / 90;
+  return templateJunctions.flatMap(localDir => {
     const localIdx = directions.indexOf(localDir);
-    const shift = rotation / 90;
-    const globalIdx = (localIdx + shift) % 4;
-    return directions[globalIdx];
+    if (localIdx === -1) return [];
+    return [directions[(localIdx + shift) % 4]];
   });
 }
 
@@ -33,7 +33,7 @@ export function getRequiredDirections(x, y, modules) {
 // Returns rotation angles at which the module satisfies ALL required directions.
 // With no requirements (isolated module), all rotations are valid.
 export function getValidRotationsMulti(templateJunctions, requiredDirs) {
-  if (requiredDirs.length === 0) return ROTATIONS;
+  if (requiredDirs.length === 0) return [...ROTATIONS];
   return ROTATIONS.filter(angle => {
     const globalJuncs = getGlobalJunctions(templateJunctions, angle);
     return requiredDirs.every(dir => globalJuncs.includes(dir));

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { RotateCw, Trash2 } from 'lucide-react';
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
-import { MODULE_TEMPLATES, DIRECTION_OFFSETS, CELL_SIZE, CATEGORY_META } from './constants/mapData';
+import { MODULE_TEMPLATES, DIRECTION_OFFSETS, CELL_SIZE, CATEGORY_META, getTemplateLabel } from './constants/mapData';
 import { getGlobalJunctions, getRequiredDirections, getValidRotationsMulti } from './utils/mapHelpers';
 import LeftSidebar from './components/LeftSidebar';
 import RightSidebar from './components/RightSidebar';
@@ -12,14 +12,20 @@ const getBgUrl = (templateId) => bgImages[`./assets/background_${templateId.toLo
 
 export default function UnderworldMapper() {
   const [canvases, setCanvases] = useState(() => {
-    const saved = localStorage.getItem('underworld_maps');
-    return saved ? JSON.parse(saved) : [{ id: 'cave-1', name: 'First Cave System', modules: {} }];
+    try {
+      const saved = localStorage.getItem('underworld_maps');
+      if (saved) return JSON.parse(saved);
+    } catch {}
+    return [{ id: 'cave-1', name: 'First Cave System', modules: {} }];
   });
   const [activeCanvasId, setActiveCanvasId] = useState('cave-1');
 
   const [showSelectorModal, setShowSelectorModal] = useState(false);
   const [activePlusTarget, setActivePlusTarget] = useState(null);
   const hoveredModuleKeyRef = useRef(null);
+
+  const [showId, setShowId] = useState(false);
+  const [visibleLayers, setVisibleLayers] = useState({ name: true, coordinates: true, rotation: true, dots: true });
 
   useEffect(() => {
     localStorage.setItem('underworld_maps', JSON.stringify(canvases));
@@ -46,8 +52,8 @@ export default function UnderworldMapper() {
         if (validAngles.length === 0) return canvas;
 
         const currentIndex = validAngles.indexOf(currentModule.rotation);
-        const nextIndex = (currentIndex + 1) % validAngles.length;
-        const nextRotation = validAngles[nextIndex !== -1 ? nextIndex : 0];
+        const nextIndex = currentIndex === -1 ? 0 : (currentIndex + 1) % validAngles.length;
+        const nextRotation = validAngles[nextIndex];
 
         return {
           ...canvas,
@@ -277,23 +283,33 @@ export default function UnderworldMapper() {
                 )}
                 <div className="flex justify-between items-start">
                   <div className="flex flex-col">
-                    <span className="text-[12px] font-bold tracking-tight truncate w-24">{tmpl.name}</span>
-                    <span className="text-[10px] opacity-60 font-mono text-tactical-muted">({mod.x}, {mod.y})</span>
+                    {visibleLayers.name && (
+                      <span className="text-[12px] font-bold tracking-tight truncate w-24">{getTemplateLabel(tmpl, showId)}</span>
+                    )}
+                    {visibleLayers.coordinates && (
+                      <span className="text-[10px] opacity-60 font-mono text-tactical-muted">({mod.x}, {mod.y})</span>
+                    )}
                   </div>
-                  <div className="transition-transform duration-200 text-tactical-muted" style={{ transform: `rotate(${mod.rotation}deg)` }}>
-                    <RotateCw size={12} />
-                  </div>
+                  {visibleLayers.rotation && (
+                    <div className="transition-transform duration-200 text-tactical-muted" style={{ transform: `rotate(${mod.rotation}deg)` }}>
+                      <RotateCw size={12} />
+                    </div>
+                  )}
                 </div>
 
-                {tmpl.visual === 'entrance' && (
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <div className="w-3 h-3 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)] border border-white/20" />
-                  </div>
-                )}
-                {tmpl.visual === 'boss' && (
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <div className="w-3.5 h-3.5 bg-rose-600 rounded-xs rotate-45 border border-white/20 shadow-[0_0_8px_rgba(225,29,72,0.5)]" />
-                  </div>
+                {visibleLayers.dots && (
+                  <>
+                    {tmpl.visual === 'entrance' && (
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <div className="w-3 h-3 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)] border border-white/20" />
+                      </div>
+                    )}
+                    {tmpl.visual === 'boss' && (
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <div className="w-3.5 h-3.5 bg-rose-600 rounded-xs rotate-45 border border-white/20 shadow-[0_0_8px_rgba(225,29,72,0.5)]" />
+                      </div>
+                    )}
+                  </>
                 )}
 
                 <div className="flex items-center justify-end gap-1 transition-opacity opacity-0 group-hover:opacity-100">
@@ -319,13 +335,19 @@ export default function UnderworldMapper() {
         </TransformWrapper>
       </main>
 
-      <RightSidebar />
+      <RightSidebar
+        showId={showId}
+        setShowId={setShowId}
+        visibleLayers={visibleLayers}
+        setVisibleLayers={setVisibleLayers}
+      />
 
       <ModuleSelectorModal
         isOpen={showSelectorModal}
         isFirstModule={isMapEmpty}
         onClose={() => { setShowSelectorModal(false); setActivePlusTarget(null); }}
         onSelect={handleModalSelect}
+        showId={showId}
       />
     </div>
   );

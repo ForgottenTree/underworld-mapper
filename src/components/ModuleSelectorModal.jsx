@@ -1,7 +1,7 @@
 import { X } from 'lucide-react';
-import { MODULE_TEMPLATES, CATEGORY_META } from '../constants/mapData';
+import { MODULE_TEMPLATES, CATEGORY_META, getTemplateLabel } from '../constants/mapData';
 
-export default function ModuleSelectorModal({ isOpen, onClose, onSelect, isFirstModule }) {
+export default function ModuleSelectorModal({ isOpen, onClose, onSelect, isFirstModule, showId }) {
   if (!isOpen) return null;
 
   return (
@@ -35,7 +35,7 @@ export default function ModuleSelectorModal({ isOpen, onClose, onSelect, isFirst
                             : 'bg-tactical-bg border-tactical-border hover:bg-tactical-btn hover:border-tactical-accent cursor-pointer text-tactical-text'
                         }`}
                       >
-                        <span className={`font-semibold border-l-2 pl-2 ${meta.modalHighlight}`}>{tmpl.name}</span>
+                        <span className={`font-semibold border-l-2 pl-2 ${meta.modalHighlight}`}>{getTemplateLabel(tmpl, showId)}</span>
                         <span className="text-[11px] text-tactical-muted capitalize pl-2">
                           Exits: {tmpl.junctions.join(', ')}
                         </span>
