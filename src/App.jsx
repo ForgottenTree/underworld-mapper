@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { RotateCw, Trash2 } from 'lucide-react';
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 import { MODULE_TEMPLATES, DIRECTION_OFFSETS, CELL_SIZE, CATEGORY_META, getTemplateLabel } from './constants/mapData';
-import { getGlobalJunctions, getRequiredDirections, getValidRotationsMulti } from './utils/mapHelpers';
+import { getGlobalJunctions, getRequiredDirections, getValidRotationsMulti, getReachableKeys } from './utils/mapHelpers';
 import LeftSidebar from './components/LeftSidebar';
 import RightSidebar from './components/RightSidebar';
 import ModuleSelectorModal from './components/ModuleSelectorModal';
@@ -85,9 +85,9 @@ export default function UnderworldMapper() {
 
   // --- CORE MODULE PLACEMENT ENGINE ---
   const processModuleAddition = (templateId, targetParams) => {
-    const { x, y, parentKey, parentJunction } = targetParams;
+    const { x, y } = targetParams;
     const template = MODULE_TEMPLATES[templateId];
-    
+
     let initialRotation = 0;
 
     const requiredDirs = getRequiredDirections(x, y, modules);
@@ -102,7 +102,7 @@ export default function UnderworldMapper() {
     }
 
     const key = `${x},${y}`;
-    const newModule = { templateId, x, y, rotation: initialRotation, parentKey, parentJunction };
+    const newModule = { templateId, x, y, rotation: initialRotation };
 
     setCanvases(prev => prev.map(canvas => {
       if (canvas.id !== activeCanvasId) return canvas;
@@ -138,24 +138,23 @@ export default function UnderworldMapper() {
   const handleDeleteModule = (key, e) => {
     e.stopPropagation();
 
-    // Collect the target module and all descendants via parentKey (BFS)
-    const toDelete = new Set([key]);
-    let queue = [key];
-    while (queue.length > 0) {
-      const nextQueue = [];
-      queue.forEach(pKey => {
-        Object.keys(modules).forEach(k => {
-          if (modules[k].parentKey === pKey) {
-            toDelete.add(k);
-            nextQueue.push(k);
-          }
-        });
-      });
-      queue = nextQueue;
-    }
+    // Build the module set without the deleted room, then BFS from entrances
+    // through the junction graph to find what remains reachable.
+    const proposedModules = { ...modules };
+    delete proposedModules[key];
 
-    const childCount = toDelete.size - 1;
-    if (childCount > 0 && !window.confirm(`Deleting this room will also remove ${childCount} connected room(s). Continue?`)) {
+    const entranceKeys = Object.keys(proposedModules).filter(k =>
+      MODULE_TEMPLATES[proposedModules[k]?.templateId]?.visual === 'entrance'
+    );
+    const reachable = getReachableKeys(entranceKeys, proposedModules);
+
+    const toDelete = new Set([key]);
+    Object.keys(proposedModules).forEach(k => {
+      if (!reachable.has(k)) toDelete.add(k);
+    });
+
+    const orphanCount = toDelete.size - 1;
+    if (orphanCount > 0 && !window.confirm(`Deleting this room will also remove ${orphanCount} disconnected room(s). Continue?`)) {
       return;
     }
 
@@ -174,7 +173,7 @@ export default function UnderworldMapper() {
     const tacticalBtnClass = "bg-[#1f2938] border border-[#506789] text-[#f3f7ff] hover:bg-[#334057] hover:border-tactical-accent focus:outline-none focus:ring-1 focus:ring-tactical-accent";
 
     if (isMapEmpty) {
-      const targetParams = { x: 0, y: 0, parentKey: null, parentJunction: null };
+      const targetParams = { x: 0, y: 0 };
       return (
         <button
           onClick={() => { setActivePlusTarget(targetParams); setShowSelectorModal(true); }}
@@ -202,7 +201,7 @@ export default function UnderworldMapper() {
         const targetKey = `${tx},${ty}`;
 
         if (!modules[targetKey]) {
-          targets[targetKey] = { x: tx, y: ty, parentKey: key, parentJunction: juncDir };
+          targets[targetKey] = { x: tx, y: ty };
         }
       });
     });
