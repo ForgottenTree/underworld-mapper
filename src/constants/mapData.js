@@ -1,75 +1,153 @@
 export const MODULE_TEMPLATES = {
-  CornerN02: { 
-    id: 'CornerN02', 
-    name: 'River Entrance', 
-    category: 'outer', 
-    junctions: ['left', 'bottom'], 
-    visual: 'entrance' 
+  /*
+  id = ingame names declared by developers
+  name = custom name done by us
+  category = outer/inner/boss
+  junctions = left/bottom/right/top
+  visual = entrance/boss
+  visualKeyPosition = 0/0 is top left corner 100/100 is bottom right corner
+  latticeNodes = array of { position: {x, y}, size: 'S'|'M'|'L' }
+  */
+  CornerN02: {
+    id: 'CornerN02',
+    name: 'River Entrance',
+    category: 'outer',
+    junctions: ['left', 'bottom'],
+    visual: 'entrance',
+    visualKeyPosition: { x: 80, y: 80 },
+    latticeNodes: [
+      { position: { x: 25, y: 25 }, size: 'S' },
+      { position: { x: 75, y: 25 }, size: 'S' },
+      { position: { x: 25, y: 75 }, size: 'M' },
+      { position: { x: 75, y: 75 }, size: 'S' },
+    ]
   },
-  EndN02: { 
-    id: 'EndN02', 
-    name: 'Disability Entrance', 
-    category: 'outer', 
-    junctions: ['bottom'], 
-    visual: 'entrance' 
+  EndN02: {
+    id: 'EndN02',
+    name: 'Disability Entrance',
+    category: 'outer',
+    junctions: ['bottom'],
+    visual: 'entrance',
+    visualKeyPosition: { x: 50, y: 50 },
+    latticeNodes: [
+      { position: { x: 25, y: 25 }, size: 'S' },
+      { position: { x: 75, y: 25 }, size: 'S' },
+      { position: { x: 25, y: 75 }, size: 'M' },
+      { position: { x: 75, y: 75 }, size: 'S' },
+      { position: { x: 50, y: 25 }, size: 'S' },
+    ]
   },
-  EntranceN01: { 
-    id: 'EntranceN01', 
-    name: 'Mountain Entrance', 
-    category: 'outer', 
-    junctions: ['bottom'], 
-    visual: 'entrance' 
+  EntranceN01: {
+    id: 'EntranceN01',
+    name: 'Mountain Entrance',
+    category: 'outer',
+    junctions: ['bottom'],
+    visual: 'entrance',
+    visualKeyPosition: { x: 50, y: 50 },
+    latticeNodes: [
+      { position: { x: 25, y: 25 }, size: 'S' },
+      { position: { x: 75, y: 25 }, size: 'S' },
+      { position: { x: 25, y: 75 }, size: 'M' },
+      { position: { x: 75, y: 75 }, size: 'S' },
+      { position: { x: 50, y: 25 }, size: 'S' },
+    ]
   },
-  StraightN01: { 
-    id: 'StraightN01', 
-    name: 'Middle Entrance', 
-    category: 'outer', 
-    junctions: ['bottom', 'top'], 
-    visual: 'entrance' 
+  StraightN01: {
+    id: 'StraightN01',
+    name: 'Middle Entrance',
+    category: 'outer',
+    junctions: ['bottom', 'top'],
+    visual: 'entrance',
+    visualKeyPosition: { x: 50, y: 50 },
+    latticeNodes: [
+      { position: { x: 25, y: 25 }, size: 'S' },
+      { position: { x: 75, y: 25 }, size: 'S' },
+      { position: { x: 25, y: 75 }, size: 'M' },
+      { position: { x: 75, y: 75 }, size: 'L' },
+      { position: { x: 50, y: 25 }, size: 'S' },
+    ]
   },
-  BranchN01: { 
-    id: 'BranchN01', 
-    name: 'Ashpot Cave', 
-    category: 'inner', 
-    junctions: ['left', 'right', 'bottom'] 
+  BranchN01: {
+    id: 'BranchN01',
+    name: 'Ashpot Cave',
+    category: 'inner',
+    junctions: ['left', 'right', 'bottom'],
+    latticeNodes: [
+      { position: { x: 25, y: 25 }, size: 'S' },
+      { position: { x: 75, y: 25 }, size: 'L' },
+      { position: { x: 25, y: 75 }, size: 'M' },
+      { position: { x: 75, y: 75 }, size: 'L' },
+      { position: { x: 50, y: 25 }, size: 'S' },
+    ]
   },
-  CornerN01: { 
-    id: 'CornerN01', 
-    name: 'Blocked Corridor', 
-    category: 'inner', 
-    junctions: ['left', 'bottom'] 
+  CornerN01: {
+    id: 'CornerN01',
+    name: 'Blocked Corridor',
+    category: 'inner',
+    junctions: ['left', 'bottom'],
+    latticeNodes: [
+      { position: { x: 25, y: 25 }, size: 'S' },
+      { position: { x: 75, y: 25 }, size: 'S' },
+      { position: { x: 25, y: 75 }, size: 'S' },
+      { position: { x: 75, y: 75 }, size: 'S' },
+    ]
   },
-  CrossN01: { 
-    id: 'CrossN01', 
-    name: 'Stone Throne', 
-    category: 'inner', 
-    junctions: ['left', 'right', 'bottom', 'top'] 
+  CrossN01: {
+    id: 'CrossN01',
+    name: 'Stone Throne',
+    category: 'inner',
+    junctions: ['left', 'right', 'bottom', 'top'],
+    latticeNodes: [
+      { position: { x: 25, y: 25 }, size: 'S' },
+      { position: { x: 75, y: 25 }, size: 'S' },
+      { position: { x: 25, y: 75 }, size: 'S' },
+      { position: { x: 75, y: 75 }, size: 'S' },
+      { position: { x: 50, y: 25 }, size: 'S' },
+    ]
   },
-  EndN01: { 
-    id: 'EndN01', 
-    name: 'Dead End Ravine', 
-    category: 'inner', 
-    junctions: ['bottom'] 
+  EndN01: {
+    id: 'EndN01',
+    name: 'Dead End Ravine',
+    category: 'inner',
+    junctions: ['bottom'],
+    latticeNodes: [
+      { position: { x: 25, y: 25 }, size: 'S' },
+      { position: { x: 75, y: 25 }, size: 'S' },
+      { position: { x: 25, y: 75 }, size: 'S' },
+      { position: { x: 75, y: 75 }, size: 'M' },
+      { position: { x: 50, y: 25 }, size: 'S' },
+    ]
   },
-  StraightN02: { 
-    id: 'StraightN02', 
-    name: 'Womb Cave', 
-    category: 'inner', 
-    junctions: ['bottom', 'top'] 
+  StraightN02: {
+    id: 'StraightN02',
+    name: 'Womb Cave',
+    category: 'inner',
+    junctions: ['bottom', 'top'],
+    latticeNodes: [
+      { position: { x: 25, y: 25 }, size: 'S' },
+      { position: { x: 75, y: 25 }, size: 'L' },
+      { position: { x: 25, y: 75 }, size: 'M' },
+      { position: { x: 75, y: 75 }, size: 'L' },
+      { position: { x: 50, y: 25 }, size: 'S' },
+    ]
   },
-  EndNBoss01: { 
-    id: 'EndNBoss01', 
-    name: 'Dead End Bossroom', 
-    category: 'boss', 
-    junctions: ['bottom'], 
-    visual: 'boss' 
+  EndNBoss01: {
+    id: 'EndNBoss01',
+    name: 'Dead End Bossroom',
+    category: 'boss',
+    junctions: ['bottom'],
+    visual: 'boss',
+    visualKeyPosition: { x: 50, y: 50 },
+    latticeNodes: []
   },
-  StraightNBoss01: { 
-    id: 'StraightNBoss01', 
-    name: 'Passthrough Bossroom', 
-    category: 'boss', 
-    junctions: ['bottom', 'top'], 
-    visual: 'boss' 
+  StraightNBoss01: {
+    id: 'StraightNBoss01',
+    name: 'Passthrough Bossroom',
+    category: 'boss',
+    junctions: ['bottom', 'top'],
+    visual: 'boss',
+    visualKeyPosition: { x: 50, y: 50 },
+    latticeNodes: []
   }
 };
 
@@ -80,6 +158,7 @@ export const CATEGORY_META = {
     cardTheme: 'bg-tactical-panel border-emerald-500/50 text-emerald-300',
     sidebarBorder: 'border-l-emerald-500/50',
     modalHighlight: 'border-emerald-500/30',
+    borderClass: 'border-emerald-500/50',
   },
   inner: {
     label: 'Inner Modules',
@@ -87,6 +166,7 @@ export const CATEGORY_META = {
     cardTheme: 'bg-tactical-panel border-indigo-500/50 text-indigo-300',
     sidebarBorder: 'border-l-indigo-500/50',
     modalHighlight: 'border-indigo-500/30',
+    borderClass: 'border-indigo-500/50',
   },
   boss: {
     label: 'Boss Modules',
@@ -94,6 +174,7 @@ export const CATEGORY_META = {
     cardTheme: 'bg-tactical-panel border-rose-500/50 text-rose-300',
     sidebarBorder: 'border-l-rose-500/50',
     modalHighlight: 'border-rose-500/30',
+    borderClass: 'border-rose-500/50',
   },
 };
 

@@ -1,21 +1,47 @@
 import { useState } from 'react';
-import { HelpCircle, LayoutGrid, Type, Hash, RotateCw, Circle, ChevronDown, Square, Maximize2, Link } from 'lucide-react';
+import { HelpCircle, LayoutGrid, Type, Hash, RotateCw, ChevronDown, Square, Maximize2, Link, DoorOpen, Stone, Trophy } from 'lucide-react';
 import { MODULE_TEMPLATES, CATEGORY_META, getTemplateLabel } from '../constants/mapData';
 
-const LAYERS_ROW1 = [
-  { key: 'name',        label: 'Name',        Icon: Type },
-  { key: 'coordinates', label: 'Coordinates',  Icon: Hash },
-  { key: 'rotation',    label: 'Rotation',     Icon: RotateCw },
-  { key: 'dots',        label: 'Markers',      Icon: Circle },
+const LAYER_GROUPS = [
+  {
+    key: 'description',
+    label: 'Description',
+    gridCols: 'grid-cols-3',
+    items: [
+      { key: 'name',        label: 'Name',        Icon: Type },
+      { key: 'coordinates', label: 'Coordinates', Icon: Hash },
+      { key: 'rotation',    label: 'Rotation',    Icon: RotateCw },
+    ],
+  },
+  {
+    key: 'structure',
+    label: 'Structure',
+    gridCols: 'grid-cols-3',
+    items: [
+      { key: 'borders',   label: 'Borders',   Icon: Square },
+      { key: 'junctions', label: 'Junctions', Icon: Link },
+      { key: 'padding',   label: 'Padding',   Icon: Maximize2 },
+    ],
+  },
+  {
+    key: 'item',
+    label: 'Items',
+    gridCols: 'grid-cols-3',
+    items: [
+      { key: 'entrance', label: 'Entrances',     Icon: DoorOpen },
+      { key: 'boss',     label: 'Boss Rooms',    Icon: Trophy },
+      { key: 'lattice',  label: 'Lattice Nodes', Icon: Stone },
+    ],
+  },
+  {
+    key: 'background',
+    label: 'Background',
+    gridCols: '',
+    items: [],
+  },
 ];
 
-const LAYERS_ROW2 = [
-  { key: 'borders',   label: 'Borders',   Icon: Square },
-  { key: 'junctions', label: 'Junctions', Icon: Link },
-  { key: 'padding',   label: 'Padding',   Icon: Maximize2 },
-];
-
-export default function RightSidebar({ showId, setShowId, visibleLayers, setVisibleLayers, bgOpacity, setBgOpacity }) {
+export default function RightSidebar({ showId, setShowId, visibleLayers, setVisibleLayers, layerOpacity, setLayerOpacity }) {
   const [helpOpen, setHelpOpen] = useState(false);
 
   const handleDragStart = (e, templateId) => {
@@ -46,8 +72,9 @@ export default function RightSidebar({ showId, setShowId, visibleLayers, setVisi
           </button>
           {helpOpen && (
             <div className="px-3 pb-3 space-y-2 border-t border-tactical-divider pt-2">
-              <p>• Drag & Drop assets directly onto a <kbd className="bg-tactical-btn px-1 border border-tactical-border rounded text-tactical-text font-mono text-[10px]">+</kbd> or press a <kbd className="bg-tactical-btn px-1 border border-tactical-border rounded text-tactical-text font-mono text-[10px]">+</kbd> to add one.</p>
+              <p>• Drag & Drop assets directly onto a <kbd className="bg-tactical-btn px-1 border border-tactical-border rounded text-tactical-text font-mono text-[10px]">+</kbd> or press on a <kbd className="bg-tactical-btn px-1 border border-tactical-border rounded text-tactical-text font-mono text-[10px]">+</kbd> to add one.</p>
               <p>• Hover over a room and press <kbd className="bg-tactical-btn px-1 border border-tactical-border rounded text-tactical-text font-mono text-[10px]">R</kbd> to rotate.</p>
+              <p>• Hover over a room and press <kbd className="bg-tactical-btn px-1 border border-tactical-border rounded text-tactical-text font-mono text-[10px]">DEL</kbd> to delete.</p>
             </div>
           )}
         </div>
@@ -81,56 +108,43 @@ export default function RightSidebar({ showId, setShowId, visibleLayers, setVisi
             </div>
           </div>
 
-          <div className="space-y-1.5">
+          <div className="space-y-3">
             <span className="text-[11px] text-tactical-muted">Layers</span>
-            <div className="grid grid-cols-4 gap-1">
-              {LAYERS_ROW1.map(({ key, label, Icon }) => (
-                <button
-                  key={key}
-                  onClick={() => toggleLayer(key)}
-                  title={label}
-                  className={`flex items-center justify-center py-1.5 rounded border transition ${
-                    visibleLayers[key]
-                      ? 'bg-tactical-accent/10 border-tactical-accent/50 text-tactical-accent'
-                      : 'bg-tactical-bg border-tactical-border text-tactical-muted hover:text-tactical-text hover:border-tactical-input-border'
-                  }`}
-                >
-                  <Icon size={13} />
-                </button>
-              ))}
-            </div>
-            <div className="grid grid-cols-4 gap-1">
-              {LAYERS_ROW2.map(({ key, label, Icon, text }) => (
-                <button
-                  key={key}
-                  onClick={() => toggleLayer(key)}
-                  title={label}
-                  className={`flex items-center justify-center py-1.5 rounded border transition ${
-                    visibleLayers[key]
-                      ? 'bg-tactical-accent/10 border-tactical-accent/50 text-tactical-accent'
-                      : 'bg-tactical-bg border-tactical-border text-tactical-muted hover:text-tactical-text hover:border-tactical-input-border'
-                  }`}
-                >
-                  {text ? <span className="text-[11px] font-bold font-mono">{text}</span> : <Icon size={13} />}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] text-tactical-muted">Background Opacity</span>
-              <span className="text-[11px] font-mono text-tactical-muted">{Math.round(bgOpacity * 100)}%</span>
-            </div>
-            <input
-              type="range"
-              min="0"
-              max="1"
-              step="0.01"
-              value={bgOpacity}
-              onChange={e => setBgOpacity(parseFloat(e.target.value))}
-              className="w-full h-1.5 rounded appearance-none bg-tactical-border cursor-pointer accent-tactical-accent"
-            />
+            {LAYER_GROUPS.map(group => (
+              <div key={group.key} className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-semibold text-tactical-muted uppercase tracking-wide">{group.label}</span>
+                  <span className="text-[10px] font-mono text-tactical-muted">{Math.round(layerOpacity[group.key] * 100)}%</span>
+                </div>
+                {group.items.length > 0 && (
+                  <div className={`grid ${group.gridCols} gap-1`}>
+                    {group.items.map(({ key, label, Icon }) => (
+                      <button
+                        key={key}
+                        onClick={() => toggleLayer(key)}
+                        title={label}
+                        className={`flex items-center justify-center py-1.5 rounded border transition ${
+                          visibleLayers[key]
+                            ? 'bg-tactical-accent/10 border-tactical-accent/50 text-tactical-accent'
+                            : 'bg-tactical-bg border-tactical-border text-tactical-muted hover:text-tactical-text hover:border-tactical-input-border'
+                        }`}
+                      >
+                        <Icon size={13} />
+                      </button>
+                    ))}
+                  </div>
+                )}
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.01"
+                  value={layerOpacity[group.key]}
+                  onChange={e => setLayerOpacity(prev => ({ ...prev, [group.key]: parseFloat(e.target.value) }))}
+                  className="w-full h-1.5 rounded appearance-none bg-tactical-border cursor-pointer accent-tactical-accent"
+                />
+              </div>
+            ))}
           </div>
         </div>
 
