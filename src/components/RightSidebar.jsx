@@ -46,7 +46,7 @@ export default function RightSidebar({ showId, setShowId, visibleLayers, setVisi
           </button>
           {helpOpen && (
             <div className="px-3 pb-3 space-y-2 border-t border-tactical-divider pt-2">
-              <p>• Drag & Drop assets directly onto a connection node.</p>
+              <p>• Drag & Drop assets directly onto a <kbd className="bg-tactical-btn px-1 border border-tactical-border rounded text-tactical-text font-mono text-[10px]">+</kbd> or press a <kbd className="bg-tactical-btn px-1 border border-tactical-border rounded text-tactical-text font-mono text-[10px]">+</kbd> to add one.</p>
               <p>• Hover over a room and press <kbd className="bg-tactical-btn px-1 border border-tactical-border rounded text-tactical-text font-mono text-[10px]">R</kbd> to rotate.</p>
             </div>
           )}

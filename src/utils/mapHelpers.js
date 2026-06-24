@@ -1,4 +1,3 @@
-// src/utils/mapHelpers.js
 import { ROTATIONS, DIRECTION_OFFSETS, MODULE_TEMPLATES } from '../constants/mapData';
 
 export function getGlobalJunctions(templateJunctions, rotation) {

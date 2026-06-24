@@ -15,7 +15,7 @@ export default function UnderworldMapper() {
     try {
       const saved = localStorage.getItem('underworld_maps');
       if (saved) return JSON.parse(saved);
-    } catch {}
+    } catch { /* empty */ }
     return [{ id: 'cave-1', name: 'First Cave System', modules: {} }];
   });
   const [activeCanvasId, setActiveCanvasId] = useState('cave-1');
@@ -25,7 +25,15 @@ export default function UnderworldMapper() {
   const hoveredModuleKeyRef = useRef(null);
 
   const [showId, setShowId] = useState(false);
-  const [visibleLayers, setVisibleLayers] = useState({ name: true, coordinates: true, rotation: true, dots: true, borders: true, junctions: true, padding: true });
+  const [visibleLayers, setVisibleLayers] = useState({ 
+    name: true, 
+    coordinates: true, 
+    rotation: true, 
+    dots: true, 
+    borders: true, 
+    junctions: true, 
+    padding: true 
+  });
   const [bgOpacity, setBgOpacity] = useState(0.35);
 
   useEffect(() => {
