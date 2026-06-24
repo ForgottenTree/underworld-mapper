@@ -1,4 +1,4 @@
-import { ROTATIONS, DIRECTION_OFFSETS, MODULE_TEMPLATES } from '../constants/mapData';
+import { ROTATIONS, DIRECTION_OFFSETS, MODULE_TEMPLATES, LATTICE_NODE_CUBE_COUNTS, RESOURCE_RATIOS } from '../constants/mapData';
 
 export function getGlobalJunctions(templateJunctions, rotation) {
   const directions = ['top', 'right', 'bottom', 'left'];
@@ -35,8 +35,9 @@ export function getRequiredDirections(x, y, modules) {
 export function getReachableKeys(startKeys, modules) {
   const reachable = new Set(startKeys);
   const queue = [...startKeys];
-  while (queue.length > 0) {
-    const current = queue.shift();
+  let head = 0;
+  while (head < queue.length) {
+    const current = queue[head++];
     const mod = modules[current];
     if (!mod) continue;
     const tmpl = MODULE_TEMPLATES[mod.templateId];
@@ -58,6 +59,16 @@ export function getReachableKeys(startKeys, modules) {
   return reachable;
 }
 
+// Rotates a percentage position (0-100) around the module center for a given CW rotation.
+export function rotatePosition(px, py, rotation) {
+  switch (rotation) {
+    case 90:  return { x: 100 - py, y: px };
+    case 180: return { x: 100 - px, y: 100 - py };
+    case 270: return { x: py, y: 100 - px };
+    default:  return { x: px, y: py };
+  }
+}
+
 // Returns rotation angles at which the module satisfies ALL required directions.
 // With no requirements (isolated module), all rotations are valid.
 export function getValidRotationsMulti(templateJunctions, requiredDirs) {
@@ -66,4 +77,17 @@ export function getValidRotationsMulti(templateJunctions, requiredDirs) {
     const globalJuncs = getGlobalJunctions(templateJunctions, angle);
     return requiredDirs.every(dir => globalJuncs.includes(dir));
   });
+}
+
+export function getLatticeHoverText(depositId, size) {
+  const total = LATTICE_NODE_CUBE_COUNTS[size] ?? 0;
+  const ratios = RESOURCE_RATIOS[depositId];
+  if (!ratios) return `${total} cubes`;
+  if (depositId === 'IronMalachite') {
+    const iron = Math.round(total * ratios.Iron);
+    const malachite = Math.round(total * ratios.Malachite);
+    return `${total} cubes: ${iron} Iron and ${malachite} Malachite`;
+  }
+  const [resourceName, ratio] = Object.entries(ratios)[0];
+  return `${total} cubes: ${Math.round(total * ratio)} ${resourceName}`;
 }
